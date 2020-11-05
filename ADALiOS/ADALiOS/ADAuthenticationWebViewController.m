@@ -32,7 +32,7 @@
 
 @implementation ADAuthenticationWebViewController
 {
-    __weak UIWebView *_webView;
+    __weak WKWebView *_webView;
     
     NSURL    *_startURL;
     NSString *_endURL;
@@ -43,7 +43,7 @@
 #pragma mark - Initialization
 NSTimer *timer;
 
-- (id)initWithWebView:(UIWebView *)webView startAtURL:(NSURL *)startURL endAtURL:(NSURL *)endURL
+- (id)initWithWebView:(WKWebView *)webView startAtURL:(NSURL *)startURL endAtURL:(NSURL *)endURL
 {
     if ( nil == startURL || nil == endURL )
         return nil;
@@ -56,9 +56,9 @@ NSTimer *timer;
         _startURL  = [startURL copy];
         _endURL    = [endURL absoluteString];
         _complete  = NO;
-        _timeout = [[ADAuthenticationSettings sharedInstance] requestTimeOut];
-        _webView          = webView;
-        _webView.delegate = self;
+        _timeout   = [[ADAuthenticationSettings sharedInstance] requestTimeOut];
+        _webView   = webView;
+        _webView.navigationDelegate = self;
         [ADNTLMHandler setCancellationUrl:[_startURL absoluteString]];
     }
     
@@ -68,10 +68,10 @@ NSTimer *timer;
 - (void)dealloc
 {
     // The ADAuthenticationWebViewController can be released before the
-    // UIWebView that it is managing is released in the hosted case and
+    // WKWebView that it is managing is released in the hosted case and
     // so it is important that to stop listening for events from the
-    // UIWebView when we are released.
-    _webView.delegate = nil;
+    // WKWebView when we are released.
+    _webView.navigationDelegate = nil;
     _webView          = nil;
 }
 
@@ -109,99 +109,95 @@ NSTimer *timer;
     [_webView loadRequest:responseUrl];
 }
 
-
-#pragma mark - UIWebViewDelegate Protocol
-
-- (BOOL)webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
+- (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler
 {
-#pragma unused(webView)
-#pragma unused(navigationType)
-    
     if([ADNTLMHandler isChallengeCancelled]){
         _complete = YES;
         dispatch_async( dispatch_get_main_queue(), ^{[_delegate webAuthenticationDidCancel];});
-        return NO;
+        decisionHandler(WKNavigationActionPolicyCancel);
+        return;
     }
-    
-    NSString *requestURL = [request.URL absoluteString];
-    
-    if ([requestURL caseInsensitiveCompare:@"about:blank"] == NSOrderedSame)
+
+    NSURL* requestURL = navigationAction.request.URL;
+    NSString *requestURLString = [requestURL absoluteString];
+
+    if ([requestURLString caseInsensitiveCompare:@"about:blank"] == NSOrderedSame)
     {
-        return NO;
+        decisionHandler(WKNavigationActionPolicyCancel);
+        return;
     }
-    
-    if ([[[request.URL scheme] lowercaseString] isEqualToString:@"browser"]) {
+
+    if ([[[requestURL scheme] lowercaseString] isEqualToString:@"browser"]) {
         _complete = YES;
         dispatch_async( dispatch_get_main_queue(), ^{[_delegate webAuthenticationDidCancel];});
-        
-        requestURL = [requestURL stringByReplacingOccurrencesOfString:@"browser://" withString:@"https://"];
-        [[UIApplication sharedApplication] openURL:[[NSURL alloc] initWithString:requestURL]];
-        
-        return NO;
+
+        requestURLString = [requestURLString stringByReplacingOccurrencesOfString:@"browser://" withString:@"https://"];
+        [[UIApplication sharedApplication] openURL:[[NSURL alloc] initWithString:requestURLString]];
+
+        decisionHandler(WKNavigationActionPolicyCancel);
+        return;
     }
-    
+
     // check for pkeyauth challenge.
-    if ([requestURL hasPrefix: pKeyAuthUrn] )
+    if ([requestURLString hasPrefix:pKeyAuthUrn] )
     {
-        [self handlePKeyAuthChallenge: requestURL];
-        return NO;
+        [self handlePKeyAuthChallenge:requestURLString];
+        decisionHandler(WKNavigationActionPolicyCancel);
+        return;
     }
-    
+
     // Stop at the end URL.
-    if ( [[requestURL lowercaseString] hasPrefix:[_endURL lowercaseString]] )
+    if ( [[requestURLString lowercaseString] hasPrefix:[_endURL lowercaseString]] )
     {
         // iOS generates a 102, Frame load interrupted error from stopLoading, so we set a flag
         // here to note that it was this code that halted the frame load in order that we can ignore
         // the error when we are notified later.
         _complete = YES;
-        
+
         // Schedule the finish event; we do this so that the web view gets a chance to stop
         // This event is explicitly scheduled on the main thread as it is UI related.
         NSAssert( nil != _delegate, @"Delegate object was lost" );
-        
-        dispatch_async( dispatch_get_main_queue(), ^{ [_delegate webAuthenticationDidCompleteWithURL:request.URL]; } );
-        
+
+        dispatch_async( dispatch_get_main_queue(), ^{ [_delegate webAuthenticationDidCompleteWithURL:requestURL]; } );
+
         // Tell the web view that this URL should not be loaded.
-        return NO;
+        decisionHandler(WKNavigationActionPolicyCancel);
+        return;
     }
-    
+
     // redirecting to non-https url is not allowed
-    if ([request.URL.scheme caseInsensitiveCompare:@"https"] != NSOrderedSame)
+    if ([requestURL.scheme caseInsensitiveCompare:@"https"] != NSOrderedSame)
     {
         AD_LOG_ERROR(@"Server is redirecting to a non-https url", AD_ERROR_NON_HTTPS_REDIRECT, nil);
         _complete = YES;
         ADAuthenticationError* error = [ADAuthenticationError errorFromNonHttpsRedirect];
         dispatch_async( dispatch_get_main_queue(), ^{ [_delegate webAuthenticationDidFailWithError:error]; } );
-        return NO;
+        decisionHandler(WKNavigationActionPolicyCancel);
+        return;
     }
-    
-    return YES;
+    decisionHandler(WKNavigationActionPolicyAllow);
 }
-
-- (void)webViewDidStartLoad:(UIWebView *)webView
+- (void)webView:(WKWebView *)webView didCommitNavigation:(WKNavigation *)navigation
 {
     if (timer != nil){
         [timer invalidate];
     }
-#pragma unused(webView)
     timer = [NSTimer scheduledTimerWithTimeInterval:_timeout target:self selector:@selector(failWithTimeout) userInfo:nil repeats:NO];
 }
 
-- (void)webViewDidFinishLoad:(UIWebView *)webView
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation
 {
-#pragma unused(webView)
     [timer invalidate];
     timer = nil;
 }
 
-- (void)webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error
+- (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error
 {
-#pragma unused(webView)
     if(timer && [timer isValid]){
         [timer invalidate];
         timer = nil;
     }
-    
+
     if (NSURLErrorCancelled == error.code)
     {
         //This is a common error that webview generates and could be ignored.
@@ -214,7 +210,7 @@ NSTimer *timer;
     {
         return;
     }
-    
+
     // If we failed on an invalid URL check to see if it matches our end URL
     if ([error.domain isEqualToString:NSURLErrorDomain] && (error.code == NSURLErrorUnsupportedURL || error.code == NSURLErrorCannotFindHost))
     {
@@ -227,14 +223,14 @@ NSTimer *timer;
             return;
         }
     }
-    
+
     // Prior to iOS 10 the WebView trapped out this error code and didn't pass it along to us
     // now we have to trap it out ourselves.
     if ([error.domain isEqualToString:NSCocoaErrorDomain] && error.code == NSUserCancelledError)
     {
         return;
     }
-    
+
     // Ignore failures that are triggered after we have found the end URL
     if ( _complete == YES )
     {
@@ -242,7 +238,7 @@ NSTimer *timer;
         AD_LOG_VERBOSE(@"Expected error", [error localizedDescription]);
         return;
     }
-    
+
     // Tell our delegate that we are done after an error.
     if (_delegate)
     {
@@ -259,12 +255,13 @@ NSTimer *timer;
     }
 }
 
-- (void) failWithTimeout{
+- (void) failWithTimeout
+{
     
     AD_LOG_ERROR(@"Request load timeout", NSURLErrorTimedOut, nil);
-    [self webView:_webView didFailLoadWithError:[NSError errorWithDomain:NSURLErrorDomain
-                                                                    code:NSURLErrorTimedOut
-                                                                userInfo:nil]];
+    [self webView:_webView
+didFailNavigation:nil
+        withError:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorTimedOut userInfo:nil]];
 }
 
 @end

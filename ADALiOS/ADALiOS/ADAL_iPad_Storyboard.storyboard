@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13168.3" targetRuntime="iOS.CocoaTouch.iPad" propertyAccessControl="none" colorMatched="YES" initialViewController="DaP-pW-mnj">
-    <device id="ipad9_7" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch.iPad" propertyAccessControl="none" useAutolayout="YES" colorMatched="YES" initialViewController="DaP-pW-mnj">
+    <device id="ipad9_7" orientation="portrait" layout="fullscreen" appearance="light"/>
     <dependencies>
-        <deployment identifier="iOS"/>
-        <development version="8000" identifier="xcode"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13147.4"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -14,22 +10,35 @@
         <scene sceneID="VnW-m2-oXs">
             <objects>
                 <viewController modalPresentationStyle="formSheet" id="leH-LM-mXg" customClass="ADAuthenticationViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="FuW-Gq-XEv"/>
+                        <viewControllerLayoutGuide type="bottom" id="JxE-g7-0yX"/>
+                    </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="nBc-go-Asd">
-                        <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
+                        <rect key="frame" x="0.0" y="0.0" width="540" height="620"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <webView tag="106" contentMode="scaleToFill" id="s1f-g9-Kf9">
-                                <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                            </webView>
-                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" hidesWhenStopped="YES" animating="YES" style="whiteLarge" id="eov-Iv-rha">
-                                <rect key="frame" x="364.5" y="494" width="37" height="37"/>
+                            <wkWebView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="qTu-eu-18a">
+                                <rect key="frame" x="0.0" y="0.0" width="540" height="620"/>
+                                <color key="backgroundColor" red="0.36078431370000003" green="0.38823529410000002" blue="0.4039215686" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <wkWebViewConfiguration key="configuration">
+                                    <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" none="YES"/>
+                                    <wkPreferences key="preferences"/>
+                                </wkWebViewConfiguration>
+                            </wkWebView>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" fixedFrame="YES" hidesWhenStopped="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="eov-Iv-rha">
+                                <rect key="frame" x="250" y="292" width="37" height="37"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                 <color key="color" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </activityIndicatorView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="qTu-eu-18a" firstAttribute="leading" secondItem="nBc-go-Asd" secondAttribute="leading" id="28n-1U-abp"/>
+                            <constraint firstItem="qTu-eu-18a" firstAttribute="top" secondItem="FuW-Gq-XEv" secondAttribute="bottom" constant="-56" id="2Oh-SH-sQJ"/>
+                            <constraint firstItem="JxE-g7-0yX" firstAttribute="top" secondItem="qTu-eu-18a" secondAttribute="bottom" id="TqS-2l-LS0"/>
+                            <constraint firstAttribute="trailing" secondItem="qTu-eu-18a" secondAttribute="trailing" id="eq6-U6-VHL"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="S0O-Kh-zdY">
                         <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="hRD-0N-cJA">
@@ -41,12 +50,12 @@
                     <modalFormSheetSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
                     <connections>
                         <outlet property="activityIndicator" destination="eov-Iv-rha" id="hZP-uO-KOc"/>
-                        <outlet property="webView" destination="s1f-g9-Kf9" id="hCI-yS-jxK"/>
+                        <outlet property="webView" destination="qTu-eu-18a" id="qyQ-63-ed9"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="aLu-Ej-43d" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="765" y="806"/>
+            <point key="canvasLocation" x="597.65625" y="472.26562499999994"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="CYh-cC-ywE">
@@ -54,7 +63,7 @@
                 <navigationController storyboardIdentifier="LogonNavigator" definesPresentationContext="YES" modalPresentationStyle="formSheet" id="DaP-pW-mnj" sceneMemberID="viewController">
                     <modalFormSheetSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="uxq-zN-5N6">
-                        <rect key="frame" x="0.0" y="0.0" width="1000" height="1000"/>
+                        <rect key="frame" x="0.0" y="0.0" width="540" height="56"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
@@ -63,7 +72,7 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="1IG-TA-rdd" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="73" y="806"/>
+            <point key="canvasLocation" x="57.03125" y="472.26562499999994"/>
         </scene>
     </scenes>
 </document>
