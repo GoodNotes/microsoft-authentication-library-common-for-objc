@@ -1,12 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13168.3" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" colorMatched="YES" initialViewController="Hml-Uj-EMT">
-    <device id="retina4_7" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" colorMatched="YES" initialViewController="Hml-Uj-EMT">
+    <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
-        <deployment identifier="iOS"/>
-        <development version="8000" identifier="xcode"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13147.4"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -15,7 +11,7 @@
             <objects>
                 <navigationController storyboardIdentifier="LogonNavigator" definesPresentationContext="YES" id="Hml-Uj-EMT" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" id="d1T-rc-yVs">
-                        <rect key="frame" x="0.0" y="0.0" width="1000" height="1000"/>
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
@@ -24,28 +20,41 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="IDY-lM-JgL" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="229" y="247"/>
+            <point key="canvasLocation" x="331.8840579710145" y="165.40178571428569"/>
         </scene>
         <!--Authentication View Controller-->
         <scene sceneID="0yt-pg-Fvf">
             <objects>
                 <viewController id="GcB-iz-KCM" customClass="ADAuthenticationViewController" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="m8V-rH-Wm1"/>
+                        <viewControllerLayoutGuide type="bottom" id="Lid-ys-Xj5"/>
+                    </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="UxT-im-uCY">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                         <subviews>
-                            <webView tag="105" contentMode="scaleToFill" id="aQj-zZ-Grp">
-                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
-                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-                            </webView>
-                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" hidesWhenStopped="YES" animating="YES" style="whiteLarge" id="k7f-19-G6V">
-                                <rect key="frame" x="169.5" y="312.5" width="37" height="37"/>
+                            <activityIndicatorView opaque="NO" contentMode="scaleToFill" fixedFrame="YES" hidesWhenStopped="YES" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="k7f-19-G6V">
+                                <rect key="frame" x="169" y="312" width="37" height="37"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                                 <color key="color" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             </activityIndicatorView>
+                            <wkWebView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="KKH-6W-Z7w">
+                                <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                                <color key="backgroundColor" red="0.36078431370000003" green="0.38823529410000002" blue="0.4039215686" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <wkWebViewConfiguration key="configuration">
+                                    <audiovisualMediaTypes key="mediaTypesRequiringUserActionForPlayback" none="YES"/>
+                                    <wkPreferences key="preferences"/>
+                                </wkWebViewConfiguration>
+                            </wkWebView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <constraints>
+                            <constraint firstItem="KKH-6W-Z7w" firstAttribute="top" secondItem="m8V-rH-Wm1" secondAttribute="bottom" constant="-44" id="30N-2u-yLq"/>
+                            <constraint firstItem="KKH-6W-Z7w" firstAttribute="leading" secondItem="UxT-im-uCY" secondAttribute="leading" id="3dt-fW-ZtP"/>
+                            <constraint firstItem="Lid-ys-Xj5" firstAttribute="top" secondItem="KKH-6W-Z7w" secondAttribute="bottom" id="ldQ-0K-2hD"/>
+                            <constraint firstAttribute="trailing" secondItem="KKH-6W-Z7w" secondAttribute="trailing" id="yxV-dS-lpp"/>
+                        </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="rFS-lD-Be8">
                         <barButtonItem key="leftBarButtonItem" tag="106" systemItem="cancel" id="vgh-pA-bN7">
@@ -56,12 +65,12 @@
                     </navigationItem>
                     <connections>
                         <outlet property="activityIndicator" destination="k7f-19-G6V" id="zvx-g1-Oin"/>
-                        <outlet property="webView" destination="aQj-zZ-Grp" id="7Vs-Hq-TpS"/>
+                        <outlet property="webView" destination="KKH-6W-Z7w" id="rDJ-Zh-Xgl"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="ks0-Tg-cl6" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="765" y="247"/>
+            <point key="canvasLocation" x="1108" y="165.06746626686657"/>
         </scene>
     </scenes>
 </document>
